@@ -1,10 +1,10 @@
 # Workspace ONE Sensors
 
 ## Overview
-- **Authors**:Bhavya Bandi, Varun Murthy, Josue Negron, Brooks Peppin, Aaron Black, Mike Nelson, Chris Halstead, Justin Sheets, Andreano Lanusse
-- **Email**: bbandi@vmware.com, vmurthy@vmware.com, jnegron@vmware.com, bpeppin@vmware.com, aaronb@vmware.com, miken@vmware.com, chalstead@vmware.com, jsheets@vmware.com, aguedesrocha@vmware.com
+- **Authors**:Bhavya Bandi, Varun Murthy, Josue Negron, Brooks Peppin, Aaron Black, Mike Nelson, Chris Halstead, Justin Sheets, Andreano Lanusse, Adarsh Kesari
+- **Email**: bbandi@vmware.com, vmurthy@vmware.com, jnegron@vmware.com, bpeppin@vmware.com, aaronb@vmware.com, miken@vmware.com, chalstead@vmware.com, jsheets@vmware.com, aguedesrocha@vmware.com, kesaria@vmware.com
 - **Date Created**: 11/14/2018
-- **Updated**: 1/2/2020
+- **Updated**: 9/14/2020
 - **Supported Platforms**: Workspace ONE 1811+
 - **Tested on**: Windows 10 Pro/Enterprise 1803+
 
@@ -119,6 +119,15 @@ and you will find the key in the API Key field.  If it is not there you may need
 
 
 ## Change Log
+- 9/14/2020 - Removed pre-check for console version and if sensors are enabled.
+- 8/10/2020 - Added samples for oma-dm sync troubleshooting
+- 8/3/2020 - Fix issue with bitlocker_encryption_method.ps1 sample
+- 7/24/2020 - Added os_disk_free_space sensor sample. 
+- 5/28/2020 - Added ability to download/export all Sensors from console to import_sensor_samples.ps1 file (version 1.3). Added various branchcache samples.
+- 5/28/2020 - updated import_sensor_samples.ps1 (version 1.2) file. Fixed bug with -DeleteSensors parameter. Added additional logging. 
+- 3/26/2020 - os_product_key added
+- 3/13/2020 - dcu_version and dcu_lock added
+- March 2020 - many BranchCache samples bc_*
 - 1/2/2020 - Fixed example, missing ` which produced an error when running the example provided in import_sensor_samples.ps1 file. 
 - 8/5/2019 - Added os_browser_default which returns the default web browser set on the device. Thank you for the contribution Roar Myklebust. 
 - 8/2/2019 - Updated samples, updated README.md, moved template_ samples into a folder named Templates.
