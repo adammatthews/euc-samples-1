@@ -2,7 +2,6 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: User
-# Author: matthewsa
 
 ControllerPowerState="$(defaults read /Library/Preferences/com.apple.Bluetooth ControllerPowerState)"
 

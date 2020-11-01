@@ -2,12 +2,10 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: System
-# Author: matthewsa
 
 #NOTE: If time is out on machine, not sure how we will accept this sensors output. 
 
-
-TimeServer="$(sudo systemsetup -getnetworktimeserver | awk '{ print $4 }')"
+TimeServer="$(/usr/sbin/systemsetup -getnetworktimeserver | awk '{ print $4 }')"
 
 Drift="$(sntp $TimeServer | grep +/- )"
 Left="$(sntp $TimeServer | grep +/- | awk '{ print $4 }' | sed 's/+//g'| sed 's/-//g')" # the + Figure 
@@ -19,5 +17,5 @@ RightComp="$(echo "$Right>270" | bc)"
 if [ $LeftComp == 0 ] && [ $RightComp == 0 ]; then
 	echo "Compliant"
 else
-	echo "Non Compliant"
+	echo "Non Compliant - $TimeServer"
 fi
