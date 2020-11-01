@@ -1,0 +1,7 @@
+Change Log
+
+2020/10/06
+- Added QueryType extraction (to accomodate Bash, ZSH, Python3, Powershell)
+- Refactored the code which generates the extract of the code (more atomic now
+--TODO: Calculate Platform based on script filename (.sh for Mac, .ps1 for Win 10)
+--TODO: Consider adding trigger_type to the file (error handle, fall back to SCHEDULE?)

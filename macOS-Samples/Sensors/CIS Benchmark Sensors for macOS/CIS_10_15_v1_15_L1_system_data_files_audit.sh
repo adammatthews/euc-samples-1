@@ -2,7 +2,6 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: User
-# Author: matthewsa@vmware.com
 
 ConfigDataInstall="$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | egrep '(ConfigDataInstall)' | awk '{ print $3 }' | sed 's/;//g')"
 CriticalUpdateInstall="$(defaults read /Library/Preferences/com.apple.SoftwareUpdate | egrep '(CriticalUpdateInstall)' | awk '{ print $3 }' | sed 's/;//g')"

@@ -2,7 +2,6 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: User
-# Author: matthewsa@vmware.com
 
 AutoUpdate="$(defaults read /Library/Preferences/com.apple.commerce AutoUpdate)"
 if [[ $AutoUpdate == 1 ]]; then

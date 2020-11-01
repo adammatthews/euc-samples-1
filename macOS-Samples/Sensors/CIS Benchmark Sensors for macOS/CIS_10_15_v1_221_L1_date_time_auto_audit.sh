@@ -2,9 +2,8 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: System
-# Author: matthewsa
 
-NetworkTime="$(sudo systemsetup -getusingnetworktime | awk '{ print $3 }')"
+NetworkTime="$(sudo /usr/sbin/systemsetup -getusingnetworktime | awk '{ print $3 }')"
 
 if [ $NetworkTime == "On" ]; then
 	echo "Compliant"

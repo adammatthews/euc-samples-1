@@ -2,7 +2,6 @@
 # Query Type: Bash
 # Return Type: String
 # Execution Context: User
-# Author: matthewsa
 
 BTMenu="$(defaults read com.apple.systemuiserver menuExtras | grep Bluetooth.menu)"
 

@@ -1,4 +1,4 @@
-﻿<# Workspace ONE Sensors Importer
+<# Workspace ONE Sensors Importer
 
 # Author:  Josue Negron - jnegron@vmware.com
 # Contributors: Chris Halstead - chealstead@vmware.com; Adam Matthews - matthewsa@vmware.com
@@ -98,8 +98,6 @@
 
 $URL = $WorkspaceONEServer + "/api"
 $global:CurrentSensorUUID = ""
-
-$PSScriptRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 
 # If a custom sensors directory is not provided then use current directory of import_sensor_samples.ps1 
 if (!$SensorsDirectory) {$SensorsDirectory = Get-Location}
@@ -203,7 +201,7 @@ Function Set-Sensors($SensorName, $Description, $QueryType, $Script, $ResponseTy
         'execution_context'	      = "$Context";
         'name'	                  = "$SensorName";
         'organization_group_uuid' =	"$WorkspaceONEGroupUUID";
-        'platform'	              = "APPLE_OSX";
+        'platform'	              = "$Platform";
         'query_response_type'	  = "$ResponseType";
         'query_type'	          = "$QueryType";
         'script_data'	          = "$Script";
@@ -216,7 +214,7 @@ Function Set-Sensors($SensorName, $Description, $QueryType, $Script, $ResponseTy
 }
 
 # Updates Exisiting Sensors
-Function Update-Sensors($SensorName, $Description, $QueryType, $Script, $ResponseType, $Context) {
+Function Update-Sensors($SensorName, $Description, $QueryType, $Script, $ResponseType, $Context, $Platform) {
     Write-Host("Creating new Sensor " + $SensorName)
     $endpointURL = $URL + "/mdm/devicesensors/" + $CurrentSensorUUID
     $body = @{
@@ -224,7 +222,7 @@ Function Update-Sensors($SensorName, $Description, $QueryType, $Script, $Respons
         'execution_context'	      = "$Context";
         'name'	                  = "$SensorName";
         'organization_group_uuid' =	"$WorkspaceONEGroupUUID";
-        'platform'	              = "APPLE_OSX";
+        'platform'	              = "$Platform";
         'query_response_type'	  = "$ResponseType";
         'query_type'	          = "$QueryType";
         'script_data'	          = "$Script";
@@ -250,14 +248,16 @@ Function Assign-Sensors($SensorUUID, $SmartGroupUUID) {
         'smart_groups'	          = $SmartBody;
             }
     $json = $body | ConvertTo-Json
-    $webReturn = Invoke-RestMethod -Method Post -Uri $endpointURL -Headers $headerv2 -Body $json
+    $webReturn = Invoke-RestMethod -Method Post -Uri $endpointURL -Headers $header -Body $json
 }
 
 # Parse .ps1 Files (Windows 10 Sensors)
 Function Get-PowerShellSensors {
     Write-Host("Parsing PowerShell Scripts")
-    $PSSensors = Select-String -Path $SensorsDirectory\*.sh -Pattern 'Return Type' -Context 10000000
-    Write-Host("Found " + $PSSensors.Count + " macOS Samples")
+    #PSSensors = Select-String -Path $SensorsDirectory\*.sh -Pattern 'Return Type' -Context 10000000
+    Write-Host($MyInvocation.ScriptName)
+    $PSSensors = Select-String -Path $SensorsDirectory\*.sh,$SensorsDirectory\*.ps1 -Include *.sh,*.ps1 -Exclude $MyInvocation.ScriptName -Pattern 'Return Type'
+    Write-Host("Found " + $PSSensors.Count + " Samples")
     Return $PSSensors
 }
 
@@ -384,12 +384,32 @@ $PSSensors = Get-PowerShellSensors
 $NumSensors = $PSSensors.Count - 1
 DO
     {
-    # Removes .sh from filename, convert to lowercase, replace spaces with underscores
-    $SensorName = ($PSSensors)[$NumSensors].Filename.ToLower() -replace ".sh","" -replace “ “,”_”
+    #Write-Host((($PSSensors[$NumSensors].Context.PreContext)[1].ToUpper() -split ':')[1]-replace " ","")
+
+    $sh = Select-String -pattern ".sh" -InputObject ($PSSensors)[$NumSensors].Filename.ToLower()
+    $ps1 = Select-String -pattern ".ps1" -InputObject ($PSSensors)[$NumSensors].Filename.ToLower()
+    $QueryType = Select-String -inputObject $PSSensors[$NumSensors].Context -Pattern 'Query'
+    Write-Host($QueryType)
+    # if($sh){
+    #     Write-Host("MacOS")
+    #     Write-Host(($PSSensors)[$NumSensors].Filename.ToLower() -replace ".sh","" -replace “ “,”_”)
+    #     $SensorName = ($PSSensors)[$NumSensors].Filename.ToLower() -replace ".sh","" -replace “ “,”_”
+    #     $Platform = "APPLE_OSX"
+    # }elseif($ps1){
+    #     Write-Host("WIN_RT")
+    #     Write-Host(($PSSensors)[$NumSensors].Filename.ToLower() -replace ".ps1","" -replace “ “,”_”)
+    #     $SensorName = ($PSSensors)[$NumSensors].Filename.ToLower() -replace ".ps1","" -replace “ “,”_”
+    #     $Platform = "WIN_RT"
+    # }
+    
+#     $NumSensors--
+#     } While ($NumSensors -ge 0)
+# Exit #Break while debugging
+
     # Removes Comment # and Quotes
     $Description = ($PSSensors[$NumSensors].Context.PreContext)[0] -replace '[#]' -replace '"',"" -replace "'",""
     # QUERY TYPE: BASH, ZSH, PYTHON3, POWERSHELL
-    $QueryType = (($PSSensors[$NumSensors].Context.PreContext)[1].ToUpper() -split ':')[1]-replace " ",""
+    $QueryType = (($PSSensors[$NumSensors].Context.PreContext)[1].ToUpper() -split ':')[1]-replace " ",""    
     # INTEGER, BOOLEAN, STRING, DATETIME
     $ResponseType = (($PSSensors)[$NumSensors].Line.ToUpper() -split ':')[1] -replace " ",""
     # USER, SYSTEM, ADMIN
@@ -399,7 +419,9 @@ DO
     $Bytes = [System.Text.Encoding]::UTF8.GetBytes($Data)
     $Script = [Convert]::ToBase64String($Bytes)
 
-   #Write-Host("Sensor Name:"+$SensorName + " Description:"+$Description +" Context:"+ $Context +" QueryType:"+ $QueryType + " Response Type:"+$ResponseType)
+   Write-Host("Sensor Name:"+$SensorName + " Description:"+$Description +" Context:"+ $Context +" QueryType:"+ $QueryType + " Response Type:"+$ResponseType+" Platform:"+$Platform)
+Exit
+
 
     # If DeleteSensors switch is called, then deletes all Sensor samples
     if ($DeleteSensors) {
@@ -409,13 +431,13 @@ DO
         if($UpdateSensors){
             # Check if Sensor Already Exists
             Write-Host($SensorName + " already exists in this tenant. Updating Sensor now!")
-            Update-Sensors $SensorName $Description $QueryType $Script $ResponseType $Context  
+            Update-Sensors $SensorName $Description $QueryType $Script $ResponseType $Context $Platform
         }
         # Skips Template files
     }elseif ($SensorName -match "template_get_registry_value|template_get_wmi_object|import_sensor_samples"){
         Write-Host($SensorName + " is a template. Skipping Templates.") -ForegroundColor Yellow 
     }else{ # Adds new Sensors
-        Set-Sensors $SensorName $Description $QueryType $Script $ResponseType $Context  
+        Set-Sensors $SensorName $Description $QueryType $Script $ResponseType $Context $Platform
     }
     $NumSensors--
     } While ($NumSensors -ge 0)
